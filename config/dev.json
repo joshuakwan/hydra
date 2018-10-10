@@ -1,0 +1,5 @@
+{
+    "storageType": "etcdv3",
+    "storageEndpoints": ["127.0.0.1:2379"],
+    "storageRoot": "/hydra-dev"
+}
