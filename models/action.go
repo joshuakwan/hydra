@@ -1,141 +1,121 @@
 package models
 
-import (
-	"bytes"
-	"context"
-	"encoding/json"
-	"fmt"
-	"text/template"
-	"time"
+// // CreateAction creates a db entry for an action object
+// func CreateAction(action Action) error {
+// 	client, destroyFunc, err := storage.CreateClient()
+// 	if err != nil {
+// 		return err
+// 	}
+// 	defer destroyFunc()
+// 	timeOutContext, cancel := context.WithTimeout(
+// 		context.Background(), 5*time.Second)
+// 	defer cancel()
 
-	"github.com/joshuakwan/hydra/storage"
-)
+// 	data, err := action.MarshalJSON()
+// 	if err != nil {
+// 		return err
+// 	}
 
-const (
-	actionRegistryName = "/actions/"
-)
+// 	path := fmt.Sprintf("%s%s/%s", actionRegistryName, action.Module, action.Name)
+// 	err = client.CreateObject(timeOutContext, path, string(data), 0)
+// 	if err != nil {
+// 		return err
+// 	}
+// 	return nil
+// }
 
-const actionStringTemplate = `Action {{.Module}}.{{.Name}}
-- enabled: {{.Enabled}}
-- description: {{.Description}}`
+// // GetAction retrieves a db entry for an action object
+// func GetAction(module, name string) (*Action, error) {
+// 	client, destroyFunc, err := storage.CreateClient()
+// 	if err != nil {
+// 		return nil, err
+// 	}
+// 	defer destroyFunc()
+// 	timeOutContext, cancel := context.WithTimeout(
+// 		context.Background(), 5*time.Second)
+// 	defer cancel()
 
-// Parameter defines the parameter
-type Parameter struct {
-	Name        string `json:"name" yaml:"name"`
-	Type        string `json:"type" yaml:"type"`
-	Description string `json:"description" yaml:"description"`
-}
+// 	path := fmt.Sprintf("%s%s/%s", actionRegistryName, module, name)
+// 	data, err := client.GetObject(timeOutContext, path)
+// 	if err != nil {
+// 		return nil, err
+// 	}
 
-// Action defines the data model of an action
-type Action struct {
-	Module      string      `json:"module" yaml:"module"`
-	Name        string      `json:"name" yaml:"name"`
-	Description string      `json:"description" yaml:"description"`
-	Enabled     bool        `json:"enabled" yaml:"enabled"`
-	Parameters  []Parameter `json:"parameters" yaml:"parameters"`
-}
+// 	var a Action
+// 	err = a.UnmarshalJSON(data)
+// 	if err != nil {
+// 		return nil, err
+// 	}
+// 	return &a, err
+// }
 
-func (a Action) String() string {
-	var buffer bytes.Buffer
-	t := template.New("action template")
-	t, err := t.Parse(actionStringTemplate)
-	if err != nil {
-		return ""
-	}
+// // GetActions retrieves all actions
+// func GetActions() ([]*Action, error) {
+// 	client, destroyFunc, err := storage.CreateClient()
+// 	if err != nil {
+// 		return nil, err
+// 	}
+// 	defer destroyFunc()
+// 	timeOutContext, cancel := context.WithTimeout(
+// 		context.Background(), 5*time.Second)
+// 	defer cancel()
 
-	err = t.Execute(&buffer, a)
-	if err != nil {
-		return ""
-	}
-	return buffer.String()
-}
+// 	data, err := client.GetObjects(timeOutContext, actionRegistryName)
+// 	if err != nil {
+// 		return nil, err
+// 	}
 
-// CreateAction creates a db entry for an action object
-func CreateAction(action Action) error {
-	client, destroyFunc, err := storage.CreateClient()
-	if err != nil {
-		return err
-	}
-	defer destroyFunc()
-	timeOutContext, cancel := context.WithTimeout(
-		context.Background(), 5*time.Second)
-	defer cancel()
+// 	var actions []*Action
 
-	data, err := json.Marshal(action)
-	if err != nil {
-		return err
-	}
+// 	for _, d := range data {
+// 		var a Action
+// 		err = json.Unmarshal(d, &a)
+// 		if err != nil {
+// 			log.Println(err)
+// 			return nil, err
+// 		}
+// 		actions = append(actions, &a)
+// 	}
+// 	return actions, err
+// }
 
-	path := fmt.Sprintf("%s%s/%s", actionRegistryName, action.Module, action.Name)
-	err = client.CreateObject(timeOutContext, path, string(data))
-	if err != nil {
-		return err
-	}
-	return nil
-}
+// // DeleteAction deletes a db entry for an action object
+// func DeleteAction(module, name string) error {
+// 	client, destroyFunc, err := storage.CreateClient()
+// 	if err != nil {
+// 		return err
+// 	}
+// 	defer destroyFunc()
+// 	timeOutContext, cancel := context.WithTimeout(
+// 		context.Background(), 5*time.Second)
+// 	defer cancel()
 
-// GetAction retrieves a db entry for an action object
-func GetAction(module, name string) (*Action, error) {
-	client, destroyFunc, err := storage.CreateClient()
-	if err != nil {
-		return nil, err
-	}
-	defer destroyFunc()
-	timeOutContext, cancel := context.WithTimeout(
-		context.Background(), 5*time.Second)
-	defer cancel()
+// 	path := fmt.Sprintf("%s%s/%s", actionRegistryName, module, name)
+// 	count, err := client.DeleteObject(timeOutContext, path)
+// 	if err != nil {
+// 		return err
+// 	}
+// 	if count == 0 {
+// 		return fmt.Errorf("key %s not exist, nothing deleted", path)
+// 	}
+// 	return nil
+// }
 
-	path := fmt.Sprintf("%s%s/%s", actionRegistryName, module, name)
-	data, err := client.GetObject(timeOutContext, path)
-	if err != nil {
-		return nil, err
-	}
+// // UpdateAction updates a db entry for an action object
+// func UpdateAction(action *Action) error {
+// 	client, destroyFunc, err := storage.CreateClient()
+// 	if err != nil {
+// 		return err
+// 	}
+// 	defer destroyFunc()
+// 	timeOutContext, cancel := context.WithTimeout(
+// 		context.Background(), 5*time.Second)
+// 	defer cancel()
 
-	var a Action
-	err = json.Unmarshal(data, &a)
-	if err != nil {
-		return nil, err
-	}
-	return &a, err
-}
-
-// DeleteAction deletes a db entry for an action object
-func DeleteAction(module, name string) error {
-	client, destroyFunc, err := storage.CreateClient()
-	if err != nil {
-		return err
-	}
-	defer destroyFunc()
-	timeOutContext, cancel := context.WithTimeout(
-		context.Background(), 5*time.Second)
-	defer cancel()
-
-	path := fmt.Sprintf("%s%s/%s", actionRegistryName, module, name)
-	count, err := client.DeleteObject(timeOutContext, path)
-	if err != nil {
-		return err
-	}
-	if count == 0 {
-		return fmt.Errorf("key %s not exist, nothing deleted", path)
-	}
-	return nil
-}
-
-// UpdateAction updates a db entry for an action object
-func UpdateAction(action *Action) error {
-	client, destroyFunc, err := storage.CreateClient()
-	if err != nil {
-		return err
-	}
-	defer destroyFunc()
-	timeOutContext, cancel := context.WithTimeout(
-		context.Background(), 5*time.Second)
-	defer cancel()
-
-	path := fmt.Sprintf("%s%s/%s", actionRegistryName, action.Module, action.Name)
-	data, err := json.Marshal(action)
-	if err != nil {
-		return err
-	}
-	return client.UpdateObject(timeOutContext, path, string(data))
-}
+// 	path := fmt.Sprintf("%s%s/%s", actionRegistryName, action.Module, action.Name)
+// 	data, err := json.Marshal(action)
+// 	if err != nil {
+// 		return err
+// 	}
+// 	return client.UpdateObject(timeOutContext, path, string(data))
+// }
