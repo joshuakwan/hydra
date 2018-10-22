@@ -1,4 +1,4 @@
-// Copyright 2016 CoreOS, Inc.
+// Copyright 2016 The etcd Authors
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -15,11 +15,12 @@
 package clientv3
 
 import (
-	"sync"
+	"context"
 
-	"github.com/coreos/etcd/Godeps/_workspace/src/golang.org/x/net/context"
-	"github.com/coreos/etcd/Godeps/_workspace/src/google.golang.org/grpc"
 	pb "github.com/coreos/etcd/etcdserver/etcdserverpb"
+	"github.com/coreos/etcd/pkg/types"
+
+	"google.golang.org/grpc"
 )
 
 type (
@@ -34,9 +35,6 @@ type Cluster interface {
 	// MemberList lists the current cluster membership.
 	MemberList(ctx context.Context) (*MemberListResponse, error)
 
-	// MemberLeader returns the current leader member.
-	MemberLeader(ctx context.Context) (*Member, error)
-
 	// MemberAdd adds a new member into the cluster.
 	MemberAdd(ctx context.Context, peerAddrs []string) (*MemberAddResponse, error)
 
@@ -48,123 +46,69 @@ type Cluster interface {
 }
 
 type cluster struct {
-	c *Client
-
-	mu     sync.Mutex
-	conn   *grpc.ClientConn // conn in-use
-	remote pb.ClusterClient
+	remote   pb.ClusterClient
+	callOpts []grpc.CallOption
 }
 
 func NewCluster(c *Client) Cluster {
-	conn := c.ActiveConnection()
-
-	return &cluster{
-		c: c,
-
-		conn:   conn,
-		remote: pb.NewClusterClient(conn),
+	api := &cluster{remote: RetryClusterClient(c)}
+	if c != nil {
+		api.callOpts = c.callOpts
 	}
+	return api
+}
+
+func NewClusterFromClusterClient(remote pb.ClusterClient, c *Client) Cluster {
+	api := &cluster{remote: remote}
+	if c != nil {
+		api.callOpts = c.callOpts
+	}
+	return api
 }
 
 func (c *cluster) MemberAdd(ctx context.Context, peerAddrs []string) (*MemberAddResponse, error) {
-	r := &pb.MemberAddRequest{PeerURLs: peerAddrs}
-	resp, err := c.getRemote().MemberAdd(ctx, r)
-	if err == nil {
-		return (*MemberAddResponse)(resp), nil
-	}
-
-	if isHalted(ctx, err) {
+	// fail-fast before panic in rafthttp
+	if _, err := types.NewURLs(peerAddrs); err != nil {
 		return nil, err
 	}
 
-	go c.switchRemote(err)
-	return nil, err
+	r := &pb.MemberAddRequest{PeerURLs: peerAddrs}
+	resp, err := c.remote.MemberAdd(ctx, r, c.callOpts...)
+	if err != nil {
+		return nil, toErr(ctx, err)
+	}
+	return (*MemberAddResponse)(resp), nil
 }
 
 func (c *cluster) MemberRemove(ctx context.Context, id uint64) (*MemberRemoveResponse, error) {
 	r := &pb.MemberRemoveRequest{ID: id}
-	resp, err := c.getRemote().MemberRemove(ctx, r)
-	if err == nil {
-		return (*MemberRemoveResponse)(resp), nil
+	resp, err := c.remote.MemberRemove(ctx, r, c.callOpts...)
+	if err != nil {
+		return nil, toErr(ctx, err)
 	}
-
-	if isHalted(ctx, err) {
-		return nil, err
-	}
-
-	go c.switchRemote(err)
-	return nil, err
+	return (*MemberRemoveResponse)(resp), nil
 }
 
 func (c *cluster) MemberUpdate(ctx context.Context, id uint64, peerAddrs []string) (*MemberUpdateResponse, error) {
-	// it is safe to retry on update.
-	for {
-		r := &pb.MemberUpdateRequest{ID: id, PeerURLs: peerAddrs}
-		resp, err := c.getRemote().MemberUpdate(ctx, r)
-		if err == nil {
-			return (*MemberUpdateResponse)(resp), nil
-		}
-
-		if isHalted(ctx, err) {
-			return nil, err
-		}
-
-		err = c.switchRemote(err)
-		if err != nil {
-			return nil, err
-		}
+	// fail-fast before panic in rafthttp
+	if _, err := types.NewURLs(peerAddrs); err != nil {
+		return nil, err
 	}
+
+	// it is safe to retry on update.
+	r := &pb.MemberUpdateRequest{ID: id, PeerURLs: peerAddrs}
+	resp, err := c.remote.MemberUpdate(ctx, r, c.callOpts...)
+	if err == nil {
+		return (*MemberUpdateResponse)(resp), nil
+	}
+	return nil, toErr(ctx, err)
 }
 
 func (c *cluster) MemberList(ctx context.Context) (*MemberListResponse, error) {
 	// it is safe to retry on list.
-	for {
-		resp, err := c.getRemote().MemberList(ctx, &pb.MemberListRequest{})
-		if err == nil {
-			return (*MemberListResponse)(resp), nil
-		}
-
-		if isHalted(ctx, err) {
-			return nil, err
-		}
-
-		err = c.switchRemote(err)
-		if err != nil {
-			return nil, err
-		}
+	resp, err := c.remote.MemberList(ctx, &pb.MemberListRequest{}, c.callOpts...)
+	if err == nil {
+		return (*MemberListResponse)(resp), nil
 	}
-}
-
-func (c *cluster) MemberLeader(ctx context.Context) (*Member, error) {
-	resp, err := c.MemberList(ctx)
-	if err != nil {
-		return nil, err
-	}
-	for _, m := range resp.Members {
-		if m.IsLeader {
-			return (*Member)(m), nil
-		}
-	}
-	return nil, nil
-}
-
-func (c *cluster) getRemote() pb.ClusterClient {
-	c.mu.Lock()
-	defer c.mu.Unlock()
-
-	return c.remote
-}
-
-func (c *cluster) switchRemote(prevErr error) error {
-	newConn, err := c.c.retryConnection(c.conn, prevErr)
-	if err != nil {
-		return err
-	}
-
-	c.mu.Lock()
-	defer c.mu.Unlock()
-
-	c.conn = newConn
-	c.remote = pb.NewClusterClient(c.conn)
-	return nil
+	return nil, toErr(ctx, err)
 }

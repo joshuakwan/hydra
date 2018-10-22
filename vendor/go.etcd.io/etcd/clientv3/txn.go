@@ -1,4 +1,4 @@
-// Copyright 2016 CoreOS, Inc.
+// Copyright 2016 The etcd Authors
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -15,21 +15,25 @@
 package clientv3
 
 import (
+	"context"
 	"sync"
 
-	"github.com/coreos/etcd/Godeps/_workspace/src/golang.org/x/net/context"
 	pb "github.com/coreos/etcd/etcdserver/etcdserverpb"
+
+	"google.golang.org/grpc"
 )
 
+// Txn is the interface that wraps mini-transactions.
 //
-// Tx.If(
-//  Compare(Value(k1), ">", v1),
-//  Compare(Version(k1), "=", 2)
-// ).Then(
-//  OpPut(k2,v2), OpPut(k3,v3)
-// ).Else(
-//  OpPut(k4,v4), OpPut(k5,v5)
-// ).Commit()
+//	 Txn(context.TODO()).If(
+//	  Compare(Value(k1), ">", v1),
+//	  Compare(Version(k1), "=", 2)
+//	 ).Then(
+//	  OpPut(k2,v2), OpPut(k3,v3)
+//	 ).Else(
+//	  OpPut(k4,v4), OpPut(k5,v5)
+//	 ).Commit()
+//
 type Txn interface {
 	// If takes a list of comparison. If all comparisons passed in succeed,
 	// the operations passed into Then() will be executed. Or the operations
@@ -46,8 +50,6 @@ type Txn interface {
 
 	// Commit tries to commit the transaction.
 	Commit() (*TxnResponse, error)
-
-	// TODO: add a Do for shortcut the txn without any condition?
 }
 
 type txn struct {
@@ -63,8 +65,10 @@ type txn struct {
 
 	cmps []*pb.Compare
 
-	sus []*pb.RequestUnion
-	fas []*pb.RequestUnion
+	sus []*pb.RequestOp
+	fas []*pb.RequestOp
+
+	callOpts []grpc.CallOption
 }
 
 func (txn *txn) If(cs ...Cmp) Txn {
@@ -107,7 +111,7 @@ func (txn *txn) Then(ops ...Op) Txn {
 
 	for _, op := range ops {
 		txn.isWrite = txn.isWrite || op.isWrite()
-		txn.sus = append(txn.sus, op.toRequestUnion())
+		txn.sus = append(txn.sus, op.toRequestOp())
 	}
 
 	return txn
@@ -125,7 +129,7 @@ func (txn *txn) Else(ops ...Op) Txn {
 
 	for _, op := range ops {
 		txn.isWrite = txn.isWrite || op.isWrite()
-		txn.fas = append(txn.fas, op.toRequestUnion())
+		txn.fas = append(txn.fas, op.toRequestOp())
 	}
 
 	return txn
@@ -135,26 +139,13 @@ func (txn *txn) Commit() (*TxnResponse, error) {
 	txn.mu.Lock()
 	defer txn.mu.Unlock()
 
-	kv := txn.kv
+	r := &pb.TxnRequest{Compare: txn.cmps, Success: txn.sus, Failure: txn.fas}
 
-	for {
-		r := &pb.TxnRequest{Compare: txn.cmps, Success: txn.sus, Failure: txn.fas}
-		resp, err := kv.getRemote().Txn(txn.ctx, r)
-		if err == nil {
-			return (*TxnResponse)(resp), nil
-		}
-
-		if isHalted(txn.ctx, err) {
-			return nil, err
-		}
-
-		if txn.isWrite {
-			go kv.switchRemote(err)
-			return nil, err
-		}
-
-		if nerr := kv.switchRemote(err); nerr != nil {
-			return nil, nerr
-		}
+	var resp *pb.TxnResponse
+	var err error
+	resp, err = txn.kv.remote.Txn(txn.ctx, r, txn.callOpts...)
+	if err != nil {
+		return nil, toErr(txn.ctx, err)
 	}
+	return (*TxnResponse)(resp), nil
 }
