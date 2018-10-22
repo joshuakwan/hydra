@@ -31,4 +31,8 @@
 
 [[constraint]]
   name = "go.etcd.io/etcd"
-  version = "2.3.8"
+  version = "3.3.10"
+
+[[constraint]]
+  name = "github.com/kataras/iris"
+  version = "10.7.0"

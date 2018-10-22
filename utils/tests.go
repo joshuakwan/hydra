@@ -5,6 +5,7 @@ import (
 	"testing"
 )
 
+// AssertEqual asserts if 2 objects equal with a message
 func AssertEqual(t *testing.T, a interface{}, b interface{}, message string) {
 	if a == b {
 		return
@@ -15,6 +16,7 @@ func AssertEqual(t *testing.T, a interface{}, b interface{}, message string) {
 	t.Fatal(message)
 }
 
+// AssertNotEqual asserts if 2 objects not equal with a message
 func AssertNotEqual(t *testing.T, a interface{}, b interface{}, message string) {
 	if a != b {
 		return
