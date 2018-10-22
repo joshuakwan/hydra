@@ -17,6 +17,7 @@ type DestroyFunc func()
 type Storage interface {
 	Create(ctx context.Context, key string, data []byte, ttl int64) error
 	Delete(ctx context.Context, key string) error
+	Update(ctx context.Context, key string, data []byte) error
 	Get(ctx context.Context, key string) ([]byte, error)
 	List(ctx context.Context, key string) ([][]byte, error)
 	Close() error
@@ -95,6 +96,25 @@ func (c *storageClient) Delete(ctx context.Context, key string) error {
 	}
 	if delResp.Deleted == 0 {
 		return fmt.Errorf("key %s not found, nothing deleted", key)
+	}
+	return nil
+}
+
+func (c *storageClient) Update(ctx context.Context, key string, data []byte) error {
+	key = config.GetStorageRoot() + key
+
+	log.Printf("start the txn to create %s\n", key)
+	txnResp, err := c.client.KV.Txn(ctx).If(
+		found(key),
+	).Then(
+		clientv3.OpPut(key, string(data)),
+	).Commit()
+
+	if err != nil {
+		return err
+	}
+	if !txnResp.Succeeded {
+		return fmt.Errorf("key %s not exists", key)
 	}
 	return nil
 }

@@ -44,6 +44,19 @@ func (s *Storage) Create(ctx context.Context, a *models.Action) error {
 		0)
 }
 
+// Update updates an Action
+func (s *Storage) Update(ctx context.Context, a *models.Action) error {
+	data, err := s.codec.Encode(a)
+	if err != nil {
+		return err
+	}
+	return s.storage.Update(
+		ctx,
+		fmt.Sprintf("%s%s/%s", actionRegistryName, a.Module, a.Name),
+		data,
+	)
+}
+
 // Delete deletes an Action object
 func (s *Storage) Delete(ctx context.Context, module, name string) error {
 	return s.storage.Delete(
