@@ -2,7 +2,6 @@ package models
 
 import (
 	"bytes"
-	"fmt"
 	"html/template"
 )
 
@@ -36,29 +35,16 @@ type ActionList struct {
 }
 
 // EventType represents the type of an event
-type EventType int
+type EventType string
 
 const (
 	// IF represents a triggered event
-	IF EventType = iota
+	IF EventType = "IF"
 	// THEN represents a generated event by a rule
-	THEN
+	THEN EventType = "THEN"
 	// FINALLY represents a generated event by an action
-	FINALLY
+	FINALLY EventType = "FINALLY"
 )
-
-func (e EventType) String() string {
-	switch e {
-	case IF:
-		return "IF"
-	case THEN:
-		return "THEN"
-	case FINALLY:
-		return "FINALLY"
-	default:
-		return fmt.Sprintf("%d", int(e))
-	}
-}
 
 // Event represents an event
 type Event struct {

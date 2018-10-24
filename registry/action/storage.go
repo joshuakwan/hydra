@@ -98,3 +98,8 @@ func (s *Storage) List(ctx context.Context) ([]*models.Action, error) {
 
 	return al, nil
 }
+
+// Watch watches for actions
+func (s *Storage) Watch(ctx context.Context) (storage.Watcher, error) {
+	return s.storage.Watch(ctx, actionRegistryName)
+}

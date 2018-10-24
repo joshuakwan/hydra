@@ -10,22 +10,10 @@ import (
 	"go.etcd.io/etcd/clientv3"
 )
 
-// DestroyFunc is to destroy any resources used by the storage returned in Create() together.
-type DestroyFunc func()
-
-// Storage defines the interface of a storage client
-type Storage interface {
-	Create(ctx context.Context, key string, data []byte, ttl int64) error
-	Delete(ctx context.Context, key string) error
-	Update(ctx context.Context, key string, data []byte) error
-	Get(ctx context.Context, key string) ([]byte, error)
-	List(ctx context.Context, key string) ([][]byte, error)
-	Close() error
-}
-
 type storageClient struct {
 	client       *clientv3.Client
 	leaseManager *leaseManager
+	watcher      *watcher
 }
 
 // NewStorage initialize a new storage client
@@ -54,7 +42,11 @@ func newEtcdV3Client() (Storage, DestroyFunc, error) {
 		client.Close()
 	}
 
-	return &storageClient{client: client, leaseManager: newLeaseManager(client)}, destroyFunc, nil
+	return &storageClient{
+		client:       client,
+		leaseManager: newLeaseManager(client),
+		watcher:      &watcher{client: client},
+	}, destroyFunc, nil
 }
 
 func (c *storageClient) ttlOpt(ctx context.Context, ttl int64) clientv3.OpOption {
@@ -148,6 +140,10 @@ func (c *storageClient) List(ctx context.Context, key string) ([][]byte, error) 
 	}
 
 	return data, nil
+}
+
+func (c *storageClient) Watch(ctx context.Context, key string) (Watcher, error) {
+	return c.watcher.Watch(ctx, config.GetStorageRoot()+key)
 }
 
 func (c *storageClient) Close() error {
