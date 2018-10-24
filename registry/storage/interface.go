@@ -2,6 +2,8 @@ package storage
 
 import (
 	"context"
+
+	"github.com/joshuakwan/hydra/models"
 )
 
 // DestroyFunc is to destroy any resources used by the storage returned in Create() together.
@@ -40,6 +42,7 @@ const (
 
 // WatchEvent defines events during a watch
 type WatchEvent struct {
-	Type EventType
-	Data []byte
+	Type   EventType
+	Data   []byte
+	Object models.Object
 }
