@@ -3,6 +3,8 @@ package storage
 import (
 	"context"
 
+	"github.com/joshuakwan/hydra/codec"
+
 	"github.com/joshuakwan/hydra/models"
 )
 
@@ -16,7 +18,7 @@ type Storage interface {
 	Update(ctx context.Context, key string, data []byte) error
 	Get(ctx context.Context, key string) ([]byte, error)
 	List(ctx context.Context, key string) ([][]byte, error)
-	Watch(ctx context.Context, key string) (Watcher, error)
+	Watch(ctx context.Context, key string, codec codec.Codec) (Watcher, error)
 	Close() error
 }
 
@@ -43,6 +45,5 @@ const (
 // WatchEvent defines events during a watch
 type WatchEvent struct {
 	Type   EventType
-	Data   []byte
 	Object models.Object
 }

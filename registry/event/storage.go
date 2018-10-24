@@ -88,5 +88,5 @@ func (s *Storage) List(ctx context.Context) ([]*models.Event, error) {
 
 // Watch watches for Events
 func (s *Storage) Watch(ctx context.Context) (storage.Watcher, error) {
-	return s.storage.Watch(ctx, eventRegistryName)
+	return s.storage.Watch(ctx, eventRegistryName, s.codec)
 }

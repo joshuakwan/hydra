@@ -6,6 +6,8 @@ import (
 	"log"
 	"time"
 
+	"github.com/joshuakwan/hydra/codec"
+
 	"github.com/joshuakwan/hydra/config"
 	"go.etcd.io/etcd/clientv3"
 )
@@ -142,8 +144,8 @@ func (c *storageClient) List(ctx context.Context, key string) ([][]byte, error) 
 	return data, nil
 }
 
-func (c *storageClient) Watch(ctx context.Context, key string) (Watcher, error) {
-	return c.watcher.Watch(ctx, config.GetStorageRoot()+key)
+func (c *storageClient) Watch(ctx context.Context, key string, codec codec.Codec) (Watcher, error) {
+	return c.watcher.Watch(ctx, config.GetStorageRoot()+key, codec)
 }
 
 func (c *storageClient) Close() error {

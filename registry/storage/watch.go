@@ -3,7 +3,11 @@ package storage
 import (
 	"context"
 	"log"
+	"strings"
 	"sync"
+
+	"github.com/joshuakwan/hydra/codec"
+	"github.com/joshuakwan/hydra/models"
 
 	"go.etcd.io/etcd/clientv3"
 )
@@ -15,6 +19,7 @@ type watcher struct {
 type watchChan struct {
 	watcher           *watcher
 	key               string
+	codec             codec.Codec
 	ctx               context.Context
 	cancel            context.CancelFunc
 	incomingEventChan chan *clientv3.Event
@@ -22,17 +27,18 @@ type watchChan struct {
 	errChan           chan error
 }
 
-func (w *watcher) Watch(ctx context.Context, key string) (Watcher, error) {
-	wc := w.buildWatchChan(ctx, key)
+func (w *watcher) Watch(ctx context.Context, key string, codec codec.Codec) (Watcher, error) {
+	wc := w.buildWatchChan(ctx, key, codec)
 	go wc.run()
 	return wc, nil
 }
 
 // TODO extract the buffer size to configuration
-func (w *watcher) buildWatchChan(ctx context.Context, key string) *watchChan {
+func (w *watcher) buildWatchChan(ctx context.Context, key string, codec codec.Codec) *watchChan {
 	wc := &watchChan{
 		watcher:           w,
 		key:               key,
+		codec:             codec,
 		incomingEventChan: make(chan *clientv3.Event, 10),
 		resultChan:        make(chan WatchEvent, 10),
 		errChan:           make(chan error, 1),
@@ -127,7 +133,7 @@ func (wc *watchChan) sendEvent(e *clientv3.Event) {
 }
 
 func (wc *watchChan) errorToWatchEvent(err error) WatchEvent {
-	return WatchEvent{Type: Error, Data: nil}
+	return WatchEvent{Type: Error, Object: nil}
 }
 
 func (wc *watchChan) eventToWatchEvent(e *clientv3.Event) WatchEvent {
@@ -138,12 +144,29 @@ func (wc *watchChan) eventToWatchEvent(e *clientv3.Event) WatchEvent {
 	} else if e.IsModify() {
 		we.Type = Updated
 	} else if e.Type.String() == "DELETE" {
-		we.Type = Deleted
+		return WatchEvent{Type: Deleted, Object: nil}
 	} else {
-		return WatchEvent{Type: Error, Data: nil}
+		return WatchEvent{Type: Error, Object: nil}
 	}
 
-	we.Data = e.Kv.Value
+	// Ugly code started
+	if strings.HasSuffix(wc.key, "/actions/") {
+		var a models.Action
+		err := wc.codec.Decode(e.Kv.Value, &a)
+		if err != nil {
+			return WatchEvent{Type: Error, Object: nil}
+		}
+		we.Object = a
+	} else if strings.HasSuffix(wc.key, "/events/") {
+		var ev models.Event
+		err := wc.codec.Decode(e.Kv.Value, &ev)
+		if err != nil {
+			return WatchEvent{Type: Error, Object: nil}
+		}
+		we.Object = ev
+	} else {
+
+	}
 
 	return we
 }
