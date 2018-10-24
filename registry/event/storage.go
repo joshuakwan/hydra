@@ -6,7 +6,7 @@ import (
 
 	"github.com/joshuakwan/hydra/codec"
 	"github.com/joshuakwan/hydra/models"
-	"github.com/joshuakwan/hydra/registry/storage"
+	store "github.com/joshuakwan/hydra/registry/storage"
 )
 
 const (
@@ -15,14 +15,18 @@ const (
 
 // Storage defines the storage for Event objects
 type Storage struct {
-	storage storage.Storage
-	destroy storage.DestroyFunc
+	storage store.Storage
+	destroy store.DestroyFunc
 	codec   codec.Codec
 }
 
 // NewEventStorage creates a new storage for Event objects
-func NewEventStorage(storage storage.Storage, codec codec.Codec, destroy storage.DestroyFunc) *Storage {
-	return &Storage{storage: storage, codec: codec, destroy: destroy}
+func NewEventStorage(codec codec.Codec) (*Storage, error) {
+	storage, destroy, err := store.NewStorage()
+	if err != nil {
+		return nil, err
+	}
+	return &Storage{storage: storage, codec: codec, destroy: destroy}, nil
 }
 
 // Close closes the storage connection
@@ -87,6 +91,6 @@ func (s *Storage) List(ctx context.Context) ([]*models.Event, error) {
 }
 
 // Watch watches for Events
-func (s *Storage) Watch(ctx context.Context) (storage.Watcher, error) {
+func (s *Storage) Watch(ctx context.Context) (store.Watcher, error) {
 	return s.storage.Watch(ctx, eventRegistryName, s.codec)
 }

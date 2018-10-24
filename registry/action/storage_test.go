@@ -6,7 +6,6 @@ import (
 
 	"github.com/joshuakwan/hydra/codec"
 	"github.com/joshuakwan/hydra/models"
-	"github.com/joshuakwan/hydra/registry/storage"
 	"github.com/joshuakwan/hydra/utils"
 )
 
@@ -20,14 +19,11 @@ import (
 
 func TestActionStorage(t *testing.T) {
 	// Setup code
-	storage, destroy, err := storage.NewStorage()
+	as, err := NewActionStorage(codec.NewCodec("json"))
 	if err != nil {
 		t.Error(err)
 		t.Fail()
 	}
-	codec := codec.NewCodec("json")
-	as := NewActionStorage(storage, codec, destroy)
-
 	// Test data
 	var action = models.Action{
 		Module:      "action_module",

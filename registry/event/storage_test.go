@@ -7,7 +7,6 @@ import (
 
 	"github.com/joshuakwan/hydra/codec"
 	"github.com/joshuakwan/hydra/models"
-	"github.com/joshuakwan/hydra/registry/storage"
 	"github.com/joshuakwan/hydra/utils"
 )
 
@@ -21,13 +20,11 @@ import (
 
 func TestEventStorage(t *testing.T) {
 	// Setup code
-	storage, destroy, err := storage.NewStorage()
+	es, err := NewEventStorage(codec.NewCodec("json"))
 	if err != nil {
 		t.Error(err)
 		t.Fail()
 	}
-	codec := codec.NewCodec("json")
-	es := NewEventStorage(storage, codec, destroy)
 
 	timestamp := time.Now().Unix()
 	// Test data
