@@ -2,7 +2,7 @@
 
 <a href="https://iris-go.com"> <img align="right" width="169px" src="https://iris-go.com/images/icon.svg?v=a" title="logo created by @merry.dii" /> </a>
 
-[![build status](https://img.shields.io/travis/kataras/iris/master.svg?style=flat-square)](https://travis-ci.org/kataras/iris)<!-- [![release](https://img.shields.io/github/release/kataras/iris.svg?style=flat-square)](https://github.com/kataras/iris/releases)--> [![report card](https://img.shields.io/badge/report%20card-a%2B-ff3333.svg?style=flat-square)](http://goreportcard.com/report/kataras/iris) [![vscode-iris](https://img.shields.io/badge/ext%20-vscode-0c77e3.svg?style=flat-square)](https://marketplace.visualstudio.com/items?itemName=kataras2006.iris)<!--[![github closed issues](https://img.shields.io/github/issues-closed-raw/kataras/iris.svg?style=flat-square)](https://github.com/kataras/iris/issues?q=is%3Aissue+is%3Aclosed)--> [![chat](https://img.shields.io/badge/community-%20chat-00BCD4.svg?style=flat-square)](https://kataras.rocket.chat/channel/iris) [![view examples](https://img.shields.io/badge/learn%20by-examples-0077b3.svg?style=flat-square)](https://iris-go.com/v10/recipe) [![release](https://img.shields.io/badge/release%20-v10.7-0077b3.svg?style=flat-square)](https://github.com/kataras/iris/releases)
+[![build status](https://img.shields.io/travis/kataras/iris/master.svg?style=flat-square)](https://travis-ci.org/kataras/iris)<!-- [![release](https://img.shields.io/github/release/kataras/iris.svg?style=flat-square)](https://github.com/kataras/iris/releases)--> [![report card](https://img.shields.io/badge/report%20card-a%2B-ff3333.svg?style=flat-square)](http://goreportcard.com/report/kataras/iris) [![vscode-iris](https://img.shields.io/badge/ext%20-vscode-0c77e3.svg?style=flat-square)](https://marketplace.visualstudio.com/items?itemName=kataras2006.iris)<!--[![github closed issues](https://img.shields.io/github/issues-closed-raw/kataras/iris.svg?style=flat-square)](https://github.com/kataras/iris/issues?q=is%3Aissue+is%3Aclosed)--> [![chat](https://img.shields.io/badge/community-%20chat-00BCD4.svg?style=flat-square)](https://kataras.rocket.chat/channel/iris) [![view examples](https://img.shields.io/badge/routing%20by-example-0077b3.svg?style=flat-square)](https://github.com/kataras/iris/tree/master/_examples/routing) [![release](https://img.shields.io/badge/release%20-v11.0-0077b3.svg?style=flat-square)](https://github.com/kataras/iris/releases)
 
 Iris is a fast, simple yet fully featured and very efficient web framework for Go.
 
@@ -87,30 +87,6 @@ func main() {
 $ go run example.go
 ```
 
-## Dependency Injection
-
-The package [hero](hero) contains features for binding any object or functions that `handlers` can use, these are called dependencies.
-
-With Iris you get truly safe bindings thanks to the [hero](_examples/hero) [package](hero). It is blazing-fast, near to raw handlers performance because Iris calculates everything before even server goes online!
-
-Below you will see some screenshots I prepared for you in order to be easier to understand:
-
-### 1. Path Parameters - Built'n Dependencies
-
-![](https://github.com/kataras/explore/raw/master/iris/hero/hero-1-monokai.png)
-
-### 2. Services - Static Dependencies
-
-![](https://github.com/kataras/explore/raw/master/iris/hero/hero-2-monokai.png)
-
-### 3. Per-Request - Dynamic Dependencies
-
-![](https://github.com/kataras/explore/raw/master/iris/hero/hero-3-monokai.png)
-
-`hero funcs` are very easy to understand and when you start using them **you never go back**.
-
-> With Iris you also get real and [blazing-fast](_benchmarks) [MVC support](_examples/mvc) which uses "hero" under the hoods.
-
 ## API Examples
 
 ### Using Get, Post, Put, Patch, Delete and Options
@@ -135,6 +111,113 @@ func main() {
 
 ### Parameters in path
 
+| Param Type | Go Type | Validation | Retrieve Helper |
+| -----------------|------|-------------|------|
+| `:string` | string | anything (single path segment) | `Params().Get` |
+| `:int` | int | -9223372036854775808 to 9223372036854775807 (x64) or -2147483648 to 2147483647 (x32), depends on the host arch | `Params().GetInt` |
+| `:int8` | int8 | -128 to 127 | `Params().GetInt8` |
+| `:int16` | int16 | -32768 to 32767 | `Params().GetInt16` |
+| `:int32` | int32 | -2147483648 to 2147483647 | `Params().GetInt32` |
+| `:int64` | int64 | -9223372036854775808 to 9223372036854775807 | `Params().GetInt64` |
+| `:uint` | uint | 0 to 18446744073709551615 (x64) or 0 to 4294967295 (x32), depends on the host arch | `Params().GetUint` |
+| `:uint8` | uint8 | 0 to 255 | `Params().GetUint8` |
+| `:uint16` | uint16 | 0 to 65535 | `Params().GetUint16` |
+| `:uint32` | uint32 | 0 to 4294967295 | `Params().GetUint32` |
+| `:uint64` | uint64 | 0 to 18446744073709551615 | `Params().GetUint64` |
+| `:bool` | bool | "1" or "t" or "T" or "TRUE" or "true" or "True" or "0" or "f" or "F" or "FALSE" or "false" or "False" | `Params().GetBool` |
+| `:alphabetical` | string | lowercase or uppercase letters | `Params().Get` |
+| `:file` | string | lowercase or uppercase letters, numbers, underscore (_), dash (-), point (.) and no spaces or other special characters that are not valid for filenames | `Params().Get` |
+| `:path` | string | anything, can be separated by slashes (path segments) but should be the last part of the route path | `Params().Get` | 
+
+**Usage**:
+
+```go
+app.Get("/users/{id:uint64}", func(ctx iris.Context){
+    id := ctx.Params().GetUint64Default("id", 0)
+    // [...]
+})
+```
+
+| Built'n Func | Param Types |
+| -----------|---------------|
+| `regexp`(expr string) | :string |
+| `prefix`(prefix string) | :string |
+| `suffix`(suffix string) | :string |
+| `contains`(s string) | :string |
+| `min`(minValue int or int8 or int16 or int32 or int64 or uint8 or uint16 or uint32 or uint64  or float32 or float64) | :string(char length), :int, :int8, :int16, :int32, :int64, :uint, :uint8, :uint16, :uint32, :uint64  |
+| `max`(maxValue int or int8 or int16 or int32 or int64 or uint8 or uint16 or uint32 or uint64 or float32 or float64) | :string(char length), :int, :int8, :int16, :int32, :int64, :uint, :uint8, :uint16, :uint32, :uint64 |
+| `range`(minValue, maxValue int or int8 or int16 or int32 or int64 or uint8 or uint16 or uint32 or uint64 or float32 or float64) | :int, :int8, :int16, :int32, :int64, :uint, :uint8, :uint16, :uint32, :uint64 |
+
+**Usage**:
+
+```go
+app.Get("/profile/{name:alphabetical max(255)}", func(ctx iris.Context){
+    name := ctx.Params().Get("name")
+    // len(name) <=255 otherwise this route will fire 404 Not Found
+    // and this handler will not be executed at all.
+})
+```
+
+**Do It Yourself**:
+
+The `RegisterFunc` can accept any function that returns a `func(paramValue string) bool`.
+Or just a `func(string) bool`.
+If the validation fails then it will fire `404` or whatever status code the `else` keyword has.
+
+```go
+latLonExpr := "^-?[0-9]{1,3}(?:\\.[0-9]{1,10})?$"
+latLonRegex, _ := regexp.Compile(latLonExpr)
+
+// Register your custom argument-less macro function to the :string param type.
+// MatchString is a type of func(string) bool, so we use it as it is.
+app.Macros().Get("string").RegisterFunc("coordinate", latLonRegex.MatchString)
+
+app.Get("/coordinates/{lat:string coordinate()}/{lon:string coordinate()}", func(ctx iris.Context) {
+    ctx.Writef("Lat: %s | Lon: %s", ctx.Params().Get("lat"), ctx.Params().Get("lon"))
+})
+```
+
+Register your custom macro function which accepts two int arguments.
+
+```go
+
+app.Macros().Get("string").RegisterFunc("range", func(minLength, maxLength int) func(string) bool {
+    return func(paramValue string) bool {
+        return len(paramValue) >= minLength && len(paramValue) <= maxLength
+    }
+})
+
+app.Get("/limitchar/{name:string range(1,200) else 400}", func(ctx iris.Context) {
+    name := ctx.Params().Get("name")
+    ctx.Writef(`Hello %s | the name should be between 1 and 200 characters length
+    otherwise this handler will not be executed`, name)
+})
+```
+
+Register your custom macro function which accepts a slice of strings `[...,...]`.
+
+```go
+app.Macros().Get("string").RegisterFunc("has", func(validNames []string) func(string) bool {
+    return func(paramValue string) bool {
+        for _, validName := range validNames {
+            if validName == paramValue {
+                return true
+            }
+        }
+
+        return false
+    }
+})
+
+app.Get("/static_validation/{name:string has([kataras,gerasimos,maropoulos]}", func(ctx iris.Context) {
+    name := ctx.Params().Get("name")
+    ctx.Writef(`Hello %s | the name should be "kataras" or "gerasimos" or "maropoulos"
+    otherwise this handler will not be executed`, name)
+})
+```
+
+**Example Code**:
+
 ```go
 func main() {
     app := iris.Default()
@@ -145,7 +228,16 @@ func main() {
         ctx.Writef("Hello %s", name)
     })
 
-    // However, this one will match /user/john/ and also /user/john/send.
+    // This handler will match /users/42
+    // but will not match /users/-1 because uint should be bigger than zero
+    // neither /users or /users/.
+    app.Get("/users/{id:uint64}", func(ctx iris.Context) {
+        id := ctx.Params().GetUint64Default("id", 0)
+        ctx.Writef("User with ID: %d", id)
+    })
+
+    // However, this one will match /user/john/send and also /user/john/everything/else/here
+    // but will not match /user/john neither /user/john/.
     app.Post("/user/{name:string}/{action:path}", func(ctx iris.Context) {
         name := ctx.Params().Get("name")
         action := ctx.Params().Get("action")
@@ -160,6 +252,31 @@ func main() {
 > If parameter type is missing then defaults to `string`, therefore `{name:string}` and `{name}` do the same exactly thing.
 
 > Learn more about path parameter's types by navigating [here](_examples/routing/dynamic-path/main.go#L31).
+
+
+### Dependency Injection
+
+The package [hero](hero) contains features for binding any object or functions that `handlers` can use, these are called dependencies.
+
+With Iris you get truly safe bindings thanks to the [hero](_examples/hero) [package](hero). It is blazing-fast, near to raw handlers performance because Iris calculates everything before even server goes online!
+
+Below you will see some screenshots I prepared for you in order to be easier to understand:
+
+#### 1. Path Parameters - Built'n Dependencies
+
+![](https://github.com/kataras/explore/raw/master/iris/hero/hero-1-monokai.png)
+
+#### 2. Services - Static Dependencies
+
+![](https://github.com/kataras/explore/raw/master/iris/hero/hero-2-monokai.png)
+
+#### 3. Per-Request - Dynamic Dependencies
+
+![](https://github.com/kataras/explore/raw/master/iris/hero/hero-3-monokai.png)
+
+`hero funcs` are very easy to understand and when you start using them **you never go back**.
+
+> With Iris you also get real and [blazing-fast](_benchmarks) [MVC support](_examples/mvc) which uses "hero" under the hoods.
 
 ### Querystring parameters
 
@@ -478,7 +595,6 @@ func main() {
     app.Run(
         iris.Addr(":8080"),
         iris.WithoutBanner,
-        iris.WithoutVersionChecker,
         iris.WithoutServerError(iris.ErrServerClosed),
     )
 }
@@ -528,7 +644,7 @@ func main() {
 
     // Register validation for 'User'
     // NOTE: only have to register a non-pointer type for 'User', validator
-    // interanlly dereferences during it's type checks.
+    // internally dereferences during it's type checks.
     validate.RegisterStructValidation(UserStructLevelValidation, User{})
 
     app := iris.New()
@@ -890,7 +1006,7 @@ Iris, unlike others, is 100% compatible with the standards and that's why the ma
 
 ## Support
 
-- [HISTORY](HISTORY.md#sat-11-august-2018--v1070) file is your best friend, it contains information about the latest features and changes
+- [HISTORY](HISTORY.md#su-21-october-2018--v1100) file is your best friend, it contains information about the latest features and changes
 - Did you happen to find a bug? Post it at [github issues](https://github.com/kataras/iris/issues)
 - Do you have any questions or need to speak with someone experienced to solve a problem at real-time? Join us to the [community chat](https://chat.iris-go.com)
 - Complete our form-based user experience report by clicking [here](https://docs.google.com/forms/d/e/1FAIpQLSdCxZXPANg_xHWil4kVAdhmh7EBBHQZ_4_xSZVDL-oCC_z5pA/viewform?usp=sf_link)

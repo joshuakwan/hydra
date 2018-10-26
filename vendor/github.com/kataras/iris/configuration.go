@@ -118,8 +118,8 @@ func YAML(filename string) Configuration {
 // see `WithGlobalConfiguration` for more information.
 //
 // Usage:
-// app.Configure(iris.WithConfiguration(iris.YAML("myconfig.tml"))) or
-// app.Run([iris.Runner], iris.WithConfiguration(iris.YAML("myconfig.tml"))).
+// app.Configure(iris.WithConfiguration(iris.TOML("myconfig.tml"))) or
+// app.Run([iris.Runner], iris.WithConfiguration(iris.TOML("myconfig.tml"))).
 func TOML(filename string) Configuration {
 	c := DefaultConfiguration()
 
@@ -220,14 +220,6 @@ var WithoutBanner = WithoutStartupLog
 // when control/cmd+C pressed.
 var WithoutInterruptHandler = func(app *Application) {
 	app.config.DisableInterruptHandler = true
-}
-
-// WithoutVersionChecker will disable the version checker and updater.
-// The Iris server will be not
-// receive automatic updates if you pass this
-// to the `Run` function. Use it only while you're ready for Production environment.
-var WithoutVersionChecker = func(app *Application) {
-	app.config.DisableVersionChecker = true
 }
 
 // WithoutPathCorrection disables the PathCorrection setting.
@@ -387,11 +379,6 @@ type Configuration struct {
 	//
 	// Defaults to false.
 	DisableInterruptHandler bool `json:"disableInterruptHandler,omitempty" yaml:"DisableInterruptHandler" toml:"DisableInterruptHandler"`
-
-	// DisableVersionChecker if true then process will be not be notified for any available updates.
-	//
-	// Defaults to false.
-	DisableVersionChecker bool `json:"disableVersionChecker,omitempty" yaml:"DisableVersionChecker" toml:"DisableVersionChecker"`
 
 	// DisablePathCorrection corrects and redirects the requested path to the registered path
 	// for example, if /home/ path is requested but no handler for this Route found,
@@ -677,10 +664,6 @@ func WithConfiguration(c Configuration) Configurator {
 			main.DisableInterruptHandler = v
 		}
 
-		if v := c.DisableVersionChecker; v {
-			main.DisableVersionChecker = v
-		}
-
 		if v := c.DisablePathCorrection; v {
 			main.DisablePathCorrection = v
 		}
@@ -758,7 +741,6 @@ func DefaultConfiguration() Configuration {
 	return Configuration{
 		DisableStartupLog:                 false,
 		DisableInterruptHandler:           false,
-		DisableVersionChecker:             false,
 		DisablePathCorrection:             false,
 		EnablePathEscape:                  false,
 		FireMethodNotAllowed:              false,
