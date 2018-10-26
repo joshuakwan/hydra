@@ -14,11 +14,18 @@ func actions(app *mvc.Application) {
 	app.Handle(new(controllers.ActionController))
 }
 
+func events(app *mvc.Application) {
+	eventService := services.NewEventService()
+	app.Register(eventService)
+	app.Handle(new(controllers.EventController))
+}
+
 func newApp() *iris.Application {
 	app := iris.Default()
 	app.Logger().SetLevel("debug")
 
 	mvc.Configure(app.Party("/actions"), actions)
+	mvc.Configure(app.Party("/events"), events)
 
 	return app
 }
