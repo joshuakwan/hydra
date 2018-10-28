@@ -80,6 +80,14 @@
   revision = "24195e6d38b06020d7a92c7b11960cf2e7cad2f2"
 
 [[projects]]
+  digest = "1:efbb74aed57755e7b5848e2806324e0d395f2b20a86d5842f2caf0a33368ec58"
+  name = "github.com/go-resty/resty"
+  packages = ["."]
+  pruneopts = "UT"
+  revision = "7f6b876b1d9c035d238374e2801496cd554b27f2"
+  version = "v1.10.0"
+
+[[projects]]
   digest = "1:bfc758d5a03d57d97226fac6934551c01bd76612adb119c177395b057a0a46db"
   name = "github.com/gogo/protobuf"
   packages = [
@@ -400,8 +408,8 @@
   analyzer-name = "dep"
   analyzer-version = 1
   input-imports = [
+    "github.com/go-resty/resty",
     "github.com/kataras/iris",
-    "github.com/kataras/iris/context",
     "github.com/kataras/iris/mvc",
     "github.com/robfig/cron",
     "go.etcd.io/etcd/clientv3",

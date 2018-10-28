@@ -8,12 +8,14 @@ import (
 	"github.com/joshuakwan/hydra/registry/action"
 )
 
+// ActionService defines the REST interface for Actions
 type ActionService interface {
 	Create(action *models.Action) error
 	List() []*models.Action
 	Get(module, name string) (*models.Action, bool)
 }
 
+// NewActionService initializes a concrete ActionService implementation
 func NewActionService() ActionService {
 	storage, err := action.NewActionStorage(codec.NewCodec("json"))
 	if err != nil {
