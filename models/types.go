@@ -83,6 +83,7 @@ func (a Action) String() string {
 	return buffer.String()
 }
 
+// ObjectType returns the type of ActionList
 func (al ActionList) ObjectType() ObjectType {
 	return "ActionList"
 }
@@ -90,4 +91,42 @@ func (al ActionList) ObjectType() ObjectType {
 // ObjectType returns the type of Event
 func (e Event) ObjectType() ObjectType {
 	return "Event"
+}
+
+// Now comes to the core RULE part
+
+// Then defines a successful evaluation action
+type Then struct {
+	Run        string            `json:"run" yaml:"run"`
+	Parameters map[string]string `json:"parameters" yaml:"parameters"`
+}
+
+// Expression defines an expression
+type Expression struct {
+	If   string `json:"if" yaml:"if"`
+	Then *Then  `json:"then" yaml:"then"`
+}
+
+// Rule defines a rule
+type Rule struct {
+	Module      string      `json:"module" yaml:"module"`
+	Name        string      `json:"name" yaml:"name"`
+	Description string      `json:"description" yaml:"description"`
+	Enabled     bool        `json:"enabled" yaml:"enabled"`
+	Expression  *Expression `json:"expression" yaml:"expression"`
+}
+
+// ObjectType returns the type of Then
+func (t Then) ObjectType() ObjectType {
+	return "Then"
+}
+
+// ObjectType returns the type of Expression
+func (e Expression) ObjectType() ObjectType {
+	return "Expression"
+}
+
+// ObjectType returns the type of Rule
+func (r Rule) ObjectType() ObjectType {
+	return "Rule"
 }
