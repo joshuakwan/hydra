@@ -45,6 +45,7 @@ func (c *Client) WatchEvents() <-chan models.Event {
 
 	// TODO buffer size
 	eventCh := make(chan models.Event, 10)
+
 	go func() {
 		for {
 			var event models.Event

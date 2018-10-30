@@ -101,29 +101,19 @@ type Then struct {
 	Parameters map[string]string `json:"parameters" yaml:"parameters"`
 }
 
-// Expression defines an expression
-type Expression struct {
-	If   string `json:"if" yaml:"if"`
-	Then *Then  `json:"then" yaml:"then"`
-}
-
 // Rule defines a rule
 type Rule struct {
-	Module      string      `json:"module" yaml:"module"`
-	Name        string      `json:"name" yaml:"name"`
-	Description string      `json:"description" yaml:"description"`
-	Enabled     bool        `json:"enabled" yaml:"enabled"`
-	Expression  *Expression `json:"expression" yaml:"expression"`
+	Module      string `json:"module" yaml:"module"`
+	Name        string `json:"name" yaml:"name"`
+	Description string `json:"description" yaml:"description"`
+	Enabled     bool   `json:"enabled" yaml:"enabled"`
+	If          string `json:"if" yaml:"if"`
+	Then        *Then  `json:"then" yaml:"then"`
 }
 
 // ObjectType returns the type of Then
 func (t Then) ObjectType() ObjectType {
 	return "Then"
-}
-
-// ObjectType returns the type of Expression
-func (e Expression) ObjectType() ObjectType {
-	return "Expression"
 }
 
 // ObjectType returns the type of Rule

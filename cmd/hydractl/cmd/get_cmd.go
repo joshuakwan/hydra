@@ -24,14 +24,12 @@ func handleGet(cmd *cobra.Command, args []string) {
 func getEvents() {
 	client := client.NewClient("http://127.0.0.1:8080")
 	events, err := client.ListEvents()
-	if err != nil {
-		fmt.Println("An error occurred while retrieving the events")
-	}
+	checkError(err)
 
 	table := tablewriter.NewWriter(os.Stdout)
 	table.SetBorders(tablewriter.Border{Left: true, Top: false, Right: true, Bottom: false})
 	table.SetCenterSeparator("|")
-	table.SetHeader([]string{"Timestamp", "Human Readable Time", "Source", "Message", "Type"})
+	table.SetHeader([]string{"Timestamp", "Human Readable Date", "Source", "Message", "Type"})
 
 	for _, e := range events {
 		table.Append([]string{fmt.Sprintf("%d", e.Timestamp), fmt.Sprintf("%s", time.Unix(e.Timestamp, 0)), e.Source, e.Message, string(e.Type)})

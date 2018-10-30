@@ -97,7 +97,6 @@ func (c *storageClient) Delete(ctx context.Context, key string) error {
 func (c *storageClient) Update(ctx context.Context, key string, data []byte) error {
 	key = config.GetStorageRoot() + key
 
-	log.Printf("start the txn to create %s\n", key)
 	txnResp, err := c.client.KV.Txn(ctx).If(
 		found(key),
 	).Then(

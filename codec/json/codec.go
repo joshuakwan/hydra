@@ -7,14 +7,17 @@ import (
 	"github.com/joshuakwan/hydra/models"
 )
 
-type JSONCodec struct {
+// Codec encode/decode objects against JSON
+type Codec struct {
 }
 
-func NewJSONCodec() *JSONCodec {
-	return &JSONCodec{}
+// NewJSONCodec creates a new JSON codec
+func NewJSONCodec() *Codec {
+	return &Codec{}
 }
 
-func (c *JSONCodec) Encode(obj models.Object) ([]byte, error) {
+// Encode turns object into JSON
+func (c *Codec) Encode(obj models.Object) ([]byte, error) {
 	switch obj.ObjectType() {
 	case "Parameter":
 		return json.Marshal(obj.(*models.Parameter))
@@ -24,12 +27,15 @@ func (c *JSONCodec) Encode(obj models.Object) ([]byte, error) {
 		return json.Marshal(obj.(*models.ActionList))
 	case "Event":
 		return json.Marshal(obj.(*models.Event))
+	case "Rule":
+		return json.Marshal(obj.(*models.Rule))
 	default:
 		return nil, fmt.Errorf("invalid type")
 	}
 }
 
-func (c *JSONCodec) Decode(data []byte, objRef models.Object) error {
+// Decode turns JSON into object
+func (c *Codec) Decode(data []byte, objRef models.Object) error {
 	switch objRef.ObjectType() {
 	case "Parameter":
 		return json.Unmarshal(data, objRef.(*models.Parameter))
@@ -39,6 +45,8 @@ func (c *JSONCodec) Decode(data []byte, objRef models.Object) error {
 		return json.Unmarshal(data, objRef.(*models.ActionList))
 	case "Event":
 		return json.Unmarshal(data, objRef.(*models.Event))
+	case "Rule":
+		return json.Unmarshal(data, objRef.(*models.Rule))
 	default:
 		return fmt.Errorf("invalid type")
 	}

@@ -23,8 +23,21 @@ var getCmd = &cobra.Command{
 	Run:       handleGet,
 }
 
+var createCmd = &cobra.Command{
+	Use:   "create -f <configuration file>",
+	Short: "create a resource from the config file",
+	Run:   handleCreate,
+}
+
+var filename string
+
+// Execute is the main logic of the CLI
 func Execute() {
+	createCmd.Flags().StringVarP(&filename, "file", "f", "", "source file to read from")
+	createCmd.MarkFlagRequired("file")
+
 	rootCmd.AddCommand(getCmd)
+	rootCmd.AddCommand(createCmd)
 	if err := rootCmd.Execute(); err != nil {
 		fmt.Println(err)
 		os.Exit(1)
