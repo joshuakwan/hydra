@@ -54,6 +54,23 @@ type Event struct {
 	Timestamp int64     `json:"timestamp"`
 }
 
+const eventStringTemplate = `{{.Type}} event from {{.Source}} at {{.Timestamp}}: {{.Message}} `
+
+func (e Event) String() string {
+	var buffer bytes.Buffer
+	t := template.New("event template")
+	t, err := t.Parse(eventStringTemplate)
+	if err != nil {
+		return ""
+	}
+
+	err = t.Execute(&buffer, e)
+	if err != nil {
+		return ""
+	}
+	return buffer.String()
+}
+
 // ObjectType returns the type of Parameter
 func (p Parameter) ObjectType() ObjectType {
 	return "Parameter"

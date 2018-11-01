@@ -20,12 +20,19 @@ func events(app *mvc.Application) {
 	app.Handle(new(controllers.EventController))
 }
 
+func rules(app *mvc.Application) {
+	ruleService := services.NewRuleService()
+	app.Register(ruleService)
+	app.Handle(new(controllers.RuleController))
+}
+
 func newApp() *iris.Application {
 	app := iris.Default()
 	app.Logger().SetLevel("debug")
 
 	mvc.Configure(app.Party("/actions"), actions)
 	mvc.Configure(app.Party("/events"), events)
+	mvc.Configure(app.Party("/rules"), rules)
 
 	return app
 }

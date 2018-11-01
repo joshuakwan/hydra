@@ -18,16 +18,16 @@ func NewJSONCodec() *Codec {
 
 // Encode turns object into JSON
 func (c *Codec) Encode(obj models.Object) ([]byte, error) {
-	switch obj.ObjectType() {
-	case "Parameter":
+	switch obj.(type) {
+	case *models.Parameter:
 		return json.Marshal(obj.(*models.Parameter))
-	case "Action":
+	case *models.Action:
 		return json.Marshal(obj.(*models.Action))
-	case "ActionList":
+	case *models.ActionList:
 		return json.Marshal(obj.(*models.ActionList))
-	case "Event":
+	case *models.Event:
 		return json.Marshal(obj.(*models.Event))
-	case "Rule":
+	case *models.Rule:
 		return json.Marshal(obj.(*models.Rule))
 	default:
 		return nil, fmt.Errorf("invalid type")
@@ -36,16 +36,16 @@ func (c *Codec) Encode(obj models.Object) ([]byte, error) {
 
 // Decode turns JSON into object
 func (c *Codec) Decode(data []byte, objRef models.Object) error {
-	switch objRef.ObjectType() {
-	case "Parameter":
+	switch objRef.(type) {
+	case *models.Parameter:
 		return json.Unmarshal(data, objRef.(*models.Parameter))
-	case "Action":
+	case *models.Action:
 		return json.Unmarshal(data, objRef.(*models.Action))
-	case "ActionList":
+	case *models.ActionList:
 		return json.Unmarshal(data, objRef.(*models.ActionList))
-	case "Event":
+	case *models.Event:
 		return json.Unmarshal(data, objRef.(*models.Event))
-	case "Rule":
+	case *models.Rule:
 		return json.Unmarshal(data, objRef.(*models.Rule))
 	default:
 		return fmt.Errorf("invalid type")

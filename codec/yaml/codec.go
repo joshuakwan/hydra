@@ -18,16 +18,16 @@ func NewYAMLCodec() *Codec {
 
 // Encode turns object into YAML
 func (c *Codec) Encode(obj models.Object) ([]byte, error) {
-	switch obj.ObjectType() {
-	case "Parameter":
+	switch obj.(type) {
+	case *models.Parameter:
 		return yaml.Marshal(obj.(*models.Parameter))
-	case "Action":
+	case *models.Action:
 		return yaml.Marshal(obj.(*models.Action))
-	case "ActionList":
+	case *models.ActionList:
 		return yaml.Marshal(obj.(*models.ActionList))
-	case "Event":
+	case *models.Event:
 		return yaml.Marshal(obj.(*models.Event))
-	case "Rule":
+	case *models.Rule:
 		return yaml.Marshal(obj.(*models.Rule))
 	default:
 		return nil, fmt.Errorf("invalid type")
@@ -36,16 +36,16 @@ func (c *Codec) Encode(obj models.Object) ([]byte, error) {
 
 // Decode turns YAML into object
 func (c *Codec) Decode(data []byte, objRef models.Object) error {
-	switch objRef.ObjectType() {
-	case "Parameter":
+	switch objRef.(type) {
+	case *models.Parameter:
 		return yaml.Unmarshal(data, objRef.(*models.Parameter))
-	case "Action":
+	case *models.Action:
 		return yaml.Unmarshal(data, objRef.(*models.Action))
-	case "ActionList":
+	case *models.ActionList:
 		return yaml.Unmarshal(data, objRef.(*models.ActionList))
-	case "Event":
+	case *models.Event:
 		return yaml.Unmarshal(data, objRef.(*models.Event))
-	case "Rule":
+	case *models.Rule:
 		return yaml.Unmarshal(data, objRef.(*models.Rule))
 	default:
 		return fmt.Errorf("invalid type")

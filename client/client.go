@@ -15,8 +15,8 @@ type Client struct {
 }
 
 // NewClient initializes a new REST client to the API server
-func NewClient(serverURL string) Client {
-	return Client{ServerURL: serverURL}
+func NewClient(serverURL string) *Client {
+	return &Client{ServerURL: serverURL}
 }
 
 // ListEvents lists all events
@@ -57,4 +57,18 @@ func (c *Client) WatchEvents() <-chan models.Event {
 		}
 	}()
 	return eventCh
+}
+
+// ListRules lists all rules
+func (c *Client) ListRules() ([]*models.Rule, error) {
+	resp, err := resty.R().Get(fmt.Sprintf("%s%s", c.ServerURL, "/rules"))
+	if err != nil {
+		return nil, err
+	}
+	var rules []*models.Rule
+	if err = json.Unmarshal(resp.Body(), &rules); err != nil {
+		return nil, err
+	}
+
+	return rules, nil
 }
