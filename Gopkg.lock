@@ -26,6 +26,14 @@
   revision = "b9777dc9f9cc3f3e426a01d218ddd6d52153f907"
 
 [[projects]]
+  digest = "1:5123beb18c7844f4769b85f949f8c6f6db825dfac6456f010963fa55402478ea"
+  name = "github.com/antonmedv/expr"
+  packages = ["."]
+  pruneopts = "UT"
+  revision = "3001a80fe4b4aa90779b78fd6dd39d9ceae2a13b"
+  version = "v1.1.3"
+
+[[projects]]
   branch = "master"
   digest = "1:8c99bae8191c18fc5a2ba4cc0ab7d2d3d669dfb892e32561e867418ecc25bb05"
   name = "github.com/aymerick/raymond"
@@ -448,6 +456,7 @@
   analyzer-name = "dep"
   analyzer-version = 1
   input-imports = [
+    "github.com/antonmedv/expr",
     "github.com/go-resty/resty",
     "github.com/kataras/iris",
     "github.com/kataras/iris/mvc",
@@ -456,6 +465,7 @@
     "github.com/spf13/cobra",
     "go.etcd.io/etcd/clientv3",
     "golang.org/x/crypto/ssh",
+    "gopkg.in/yaml.v2",
   ]
   solver-name = "gps-cdcl"
   solver-version = 1
