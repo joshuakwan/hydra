@@ -29,14 +29,12 @@ func TestEventStorage(t *testing.T) {
 	timestamp := time.Now().Unix()
 	// Test data
 	var event = models.Event{
-		Type:      models.IF,
 		Source:    "event_trigger",
 		Message:   "this is event 1",
 		Timestamp: timestamp,
 	}
 
 	var event2 = models.Event{
-		Type:      models.THEN,
 		Source:    "event_handler",
 		Message:   "this is event 2",
 		Timestamp: timestamp,
@@ -52,19 +50,18 @@ func TestEventStorage(t *testing.T) {
 	})
 
 	t.Run("Get event", func(t *testing.T) {
-		e, err := es.Get(context.Background(), event.Type, event.Source, timestamp)
+		e, err := es.Get(context.Background(), event.Source, timestamp)
 		if err != nil {
 			t.Error(err)
 			t.Fail()
 		}
-		utils.AssertEqual(t, e.Type, event.Type, "")
 		utils.AssertEqual(t, e.Source, event.Source, "")
 		utils.AssertEqual(t, e.Message, event.Message, "")
 		utils.AssertEqual(t, e.Timestamp, event.Timestamp, "")
 	})
 
 	t.Run("Delete event", func(t *testing.T) {
-		err = es.Delete(context.Background(), event.Type, event.Source, timestamp)
+		err = es.Delete(context.Background(), event.Source, timestamp)
 		if err != nil {
 			t.Error(err)
 			t.Fail()
@@ -91,12 +88,12 @@ func TestEventStorage(t *testing.T) {
 
 		utils.AssertEqual(t, len(el), 2, "")
 
-		err = es.Delete(context.Background(), event.Type, event.Source, timestamp)
+		err = es.Delete(context.Background(), event.Source, timestamp)
 		if err != nil {
 			t.Error(err)
 			t.Fail()
 		}
-		err = es.Delete(context.Background(), event2.Type, event2.Source, timestamp)
+		err = es.Delete(context.Background(), event2.Source, timestamp)
 		if err != nil {
 			t.Error(err)
 			t.Fail()

@@ -29,6 +29,8 @@ func (c *Codec) Encode(obj models.Object) ([]byte, error) {
 		return json.Marshal(obj.(*models.Event))
 	case *models.Rule:
 		return json.Marshal(obj.(*models.Rule))
+	case *models.Worker:
+		return json.Marshal(obj.(*models.Worker))
 	default:
 		return nil, fmt.Errorf("invalid type")
 	}
@@ -47,6 +49,8 @@ func (c *Codec) Decode(data []byte, objRef models.Object) error {
 		return json.Unmarshal(data, objRef.(*models.Event))
 	case *models.Rule:
 		return json.Unmarshal(data, objRef.(*models.Rule))
+	case *models.Worker:
+		return json.Unmarshal(data, objRef.(*models.Worker))
 	default:
 		return fmt.Errorf("invalid type")
 	}

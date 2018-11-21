@@ -43,22 +43,22 @@ func (s *Storage) Create(ctx context.Context, e *models.Event) error {
 	}
 	return s.storage.Create(
 		ctx,
-		fmt.Sprintf("%s%s/%s/%d", eventRegistryName, e.Type, e.Source, e.Timestamp),
+		fmt.Sprintf("%s%s/%d", eventRegistryName, e.Source, e.Timestamp),
 		data,
 		60)
 }
 
 // Delete deletes an Event object
-func (s *Storage) Delete(ctx context.Context, eventType models.EventType, source string, timestamp int64) error {
+func (s *Storage) Delete(ctx context.Context, source string, timestamp int64) error {
 	return s.storage.Delete(
 		ctx,
-		fmt.Sprintf("%s%s/%s/%d", eventRegistryName, eventType, source, timestamp),
+		fmt.Sprintf("%s%s/%d", eventRegistryName, source, timestamp),
 	)
 }
 
 // Get gets an Event
-func (s *Storage) Get(ctx context.Context, eventType models.EventType, source string, timestamp int64) (*models.Event, error) {
-	data, err := s.storage.Get(ctx, fmt.Sprintf("%s%s/%s/%d", eventRegistryName, eventType, source, timestamp))
+func (s *Storage) Get(ctx context.Context, source string, timestamp int64) (*models.Event, error) {
+	data, err := s.storage.Get(ctx, fmt.Sprintf("%s%s/%d", eventRegistryName, source, timestamp))
 	if err != nil {
 		return nil, err
 	}

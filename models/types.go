@@ -34,27 +34,14 @@ type ActionList struct {
 	Actions []Action `json:"actions" yaml:"actions"`
 }
 
-// EventType represents the type of an event
-type EventType string
-
-const (
-	// IF represents a triggered event
-	IF EventType = "IF"
-	// THEN represents a generated event by a rule
-	THEN EventType = "THEN"
-	// FINALLY represents a generated event by an action
-	FINALLY EventType = "FINALLY"
-)
-
 // Event represents an event
 type Event struct {
-	Type      EventType `json:"type"`
-	Source    string    `json:"source"`
-	Message   string    `json:"message"`
-	Timestamp int64     `json:"timestamp"`
+	Source    string `json:"source"`
+	Message   string `json:"message"`
+	Timestamp int64  `json:"timestamp"`
 }
 
-const eventStringTemplate = `{{.Type}} event from {{.Source}} at {{.Timestamp}}: {{.Message}} `
+const eventStringTemplate = `Event from {{.Source}} at {{.Timestamp}}: {{.Message}} `
 
 func (e Event) String() string {
 	var buffer bytes.Buffer
@@ -136,4 +123,28 @@ func (t Then) ObjectType() ObjectType {
 // ObjectType returns the type of Rule
 func (r Rule) ObjectType() ObjectType {
 	return "Rule"
+}
+
+// WorkerStatus defines status of workers
+type WorkerStatus string
+
+const (
+	// UP means the worker is running
+	UP WorkerStatus = "UP"
+	// DOWN means the worker is down
+	DOWN WorkerStatus = "DOWN"
+	// ERROR means the worker is in an error state
+	ERROR WorkerStatus = "ERROR"
+)
+
+// Worker defines a worker
+type Worker struct {
+	Name    string       `json:"name" yaml:"name"`
+	Address string       `json:"address" yaml:"address"`
+	Status  WorkerStatus `json:"status" yaml:"status"`
+}
+
+// ObjectType returns the type of Worker
+func (w Worker) ObjectType() ObjectType {
+	return "Worker"
 }

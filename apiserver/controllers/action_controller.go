@@ -1,8 +1,8 @@
 package controllers
 
 import (
+	"github.com/joshuakwan/hydra/apiserver/services"
 	"github.com/joshuakwan/hydra/models"
-	"github.com/joshuakwan/hydra/server/services"
 	"github.com/kataras/iris"
 )
 
