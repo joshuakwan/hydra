@@ -2,6 +2,7 @@ package services
 
 import (
 	"context"
+	"time"
 
 	"github.com/joshuakwan/hydra/codec"
 	"github.com/joshuakwan/hydra/models"
@@ -11,6 +12,7 @@ import (
 // WorkerService defines the REST interface for Workers
 type WorkerService interface {
 	Register(worker *models.Worker) error
+	Report(worker *models.Worker) error
 	List() []*models.Worker
 	Get(name string) (*models.Worker, bool)
 }
@@ -30,6 +32,12 @@ type workerService struct {
 
 func (w *workerService) Register(worker *models.Worker) error {
 	return w.storage.Create(context.Background(), worker)
+}
+
+func (w *workerService) Report(worker *models.Worker) error {
+	reportTime := time.Now().Unix()
+	worker.LastReport = reportTime
+	return w.storage.Update(context.Background(), worker)
 }
 
 func (w *workerService) List() []*models.Worker {

@@ -30,3 +30,13 @@ func (w *WorkerController) Post(ctx iris.Context) error {
 	}
 	return w.Service.Register(&worker)
 }
+
+// PostReport handles POST /workers/report
+func (w *WorkerController) PostReport(ctx iris.Context) error {
+	var worker models.Worker
+	err := ctx.ReadJSON(&worker)
+	if err != nil {
+		return err
+	}
+	return w.Service.Report(&worker)
+}

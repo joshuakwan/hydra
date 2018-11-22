@@ -33,6 +33,18 @@ func (c *Client) ListEvents() ([]*models.Event, error) {
 	return events, nil
 }
 
+// RegisterWorker creates a worker
+func (c *Client) RegisterWorker(worker *models.Worker) error {
+	_, err := resty.R().SetBody(worker).Post(fmt.Sprintf("%s%s", c.ServerURL, "/workers"))
+	return err
+}
+
+// ReportWorker sends a worker heartbeat
+func (c *Client) ReportWorker(worker *models.Worker) error {
+	_, err := resty.R().SetBody(worker).Post(fmt.Sprintf("%s%s", c.ServerURL, "/workers/report"))
+	return err
+}
+
 // CreateEvent creates a new Event
 func (c *Client) CreateEvent(event *models.Event) error {
 	_, err := resty.R().SetBody(event).Post(fmt.Sprintf("%s%s", c.ServerURL, "/events"))

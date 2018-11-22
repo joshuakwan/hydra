@@ -139,9 +139,11 @@ const (
 
 // Worker defines a worker
 type Worker struct {
-	Name    string       `json:"name" yaml:"name"`
-	Address string       `json:"address" yaml:"address"`
-	Status  WorkerStatus `json:"status" yaml:"status"`
+	Name       string       `json:"name" yaml:"name"`
+	Address    string       `json:"address" yaml:"address"`
+	Status     WorkerStatus `json:"status" yaml:"status"`
+	Registered int64        `json:"registeredTimestamp"`
+	LastReport int64        `json:"lastReportTimeStamp"`
 }
 
 // ObjectType returns the type of Worker
