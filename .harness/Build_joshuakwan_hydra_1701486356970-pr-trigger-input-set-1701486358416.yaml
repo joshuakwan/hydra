@@ -1,0 +1,14 @@
+inputSet:
+  name: Build_joshuakwan_hydra_1701486356970-pr-trigger-input-set
+  identifier: Build_joshuakwan_hydra_1701486356970prtriggerinputset
+  orgIdentifier: default
+  projectIdentifier: default_project
+  pipeline:
+    identifier: Build_joshuakwan_hydra_1701486356970
+    properties:
+      ci:
+        codebase:
+          build:
+            type: PR
+            spec:
+              number: <+trigger.prNumber>
