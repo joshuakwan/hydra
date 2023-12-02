@@ -1,0 +1,14 @@
+inputSet:
+  name: Build_joshuakwan_hydra_1701486356970-push-trigger-input-set
+  identifier: Build_joshuakwan_hydra_1701486356970pushtriggerinputset
+  orgIdentifier: default
+  projectIdentifier: default_project
+  pipeline:
+    identifier: Build_joshuakwan_hydra_1701486356970
+    properties:
+      ci:
+        codebase:
+          build:
+            type: branch
+            spec:
+              branch: <+trigger.branch>
