@@ -31,3 +31,27 @@ pipeline:
             spec: {}
             type: Cloud
         type: CI
+    - stage:
+        name: docker build
+        identifier: docker_build
+        description: ""
+        type: CI
+        spec:
+          cloneCodebase: true
+          platform:
+            os: Linux
+            arch: Amd64
+          runtime:
+            type: Docker
+            spec: {}
+          execution:
+            steps:
+              - step:
+                  type: BuildAndPushDockerRegistry
+                  name: BuildAndPushDockerRegistry_1
+                  identifier: BuildAndPushDockerRegistry_1
+                  spec:
+                    connectorRef: account.harnessImage
+                    repo: <+input>
+                    tags:
+                      - latest
